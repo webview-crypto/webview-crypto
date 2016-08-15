@@ -38,9 +38,9 @@ In the webview:
 ```javascript
 import {WebViewWorkerSource} from 'webview-crypto'
 
-// WebViewWorkerSource contains the JS source defining a `WebViewWorker`
+// WebViewWorkerSource contains the JS source defining a `WebViewWorker.default`
 // should be instatiated like this:
-var wvw = new WebViewWorker(sendToMain)
+var wvw = new WebViewWorker.default(sendToMain)
 // wvw.onMainMessage should be called whenever there is a message from the main.
 ```
 

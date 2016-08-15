@@ -1,0 +1,9 @@
+{
+  "globalDependencies": {
+    "node": "registry:dt/node#6.0.0+20160709114037"
+  },
+  "dependencies": {
+    "lodash": "registry:npm/lodash#4.0.0+20160701205107",
+    "tape": "registry:npm/tape#4.0.0+20160622192935"
+  }
+}

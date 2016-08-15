@@ -1,0 +1,37 @@
+{
+    "compilerOptions": {
+        "target": "es6",
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "isolatedModules": false,
+        "jsx": "react",
+        "outDir": "./dist/",
+        "sourceMap": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "declaration": true,
+        "noImplicitAny": false,
+        "noImplicitUseStrict": false,
+        "removeComments": true,
+        "noLib": false,
+        "preserveConstEnums": true,
+        "suppressImplicitAnyIndexErrors": false
+    },
+    "filesGlob": [
+        "src/*"
+    ],
+    "files": [
+        "src/asyncSerialize.ts",
+        "src/compat.ts",
+        "src/index.ts",
+        "src/MainWorker.ts",
+        "src/serializeBinary.ts",
+        "src/WebViewWorker.ts",
+        "src/webViewWorkerString.ts"
+    ],
+    "compileOnSave": false,
+    "buildOnSave": false,
+    "atom": {
+        "rewriteTsconfig": true
+    }
+}

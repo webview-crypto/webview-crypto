@@ -1,0 +1,33 @@
+language: node_js
+node_js:
+  - '6'
+
+# https://docs.travis-ci.com/user/languages/javascript-with-nodejs#Node.js-v4-(or-io.js-v3)-compiler-requirements
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8
+env:
+  global:
+    - CXX=g++-4.8
+  matrix:
+    - BROWSER_NAME=chrome BROWSER_VERSION=latest
+    - BROWSER_NAME=iphone BROWSER_VERSION=9.3
+    - BROWSER_NAME=android BROWSER_VERSION=5.1
+    # not working
+    # - BROWSER_NAME=android BROWSER_VERSION=4.4
+    # - BROWSER_NAME=android BROWSER_VERSION=5.0
+
+before_script:
+  - npm run test:typings:install
+script:
+  - npm run test:lint
+  - npm run test
+
+# doesn't help that much with speed, maybe saves 40 seconds, and potentially
+# introduces some more bugs
+# cache:
+#   directories:
+#     - node_modules

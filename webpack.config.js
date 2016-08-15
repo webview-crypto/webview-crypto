@@ -5,6 +5,9 @@ module.exports = {
   entry: ['babel-polyfill', './src/WebViewWorker'],
   output: {
     filename: "webViewWorker.js",
+
+    libraryTarget: "var",
+    library: "MainWorker"
   },
 
   resolve: {

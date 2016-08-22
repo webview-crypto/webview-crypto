@@ -4,7 +4,7 @@ import {subtle} from "../src/compat";
 declare var require: any;
 const serializeError: any = require("serialize-error");
 
-export default class WebViewWorker {
+class WebViewWorker {
   constructor(private sendToMain: (message: string) => void) {
     sendToMain("We are ready!");
   }
@@ -52,3 +52,5 @@ export default class WebViewWorker {
     this.sendToMain(message);
   }
 }
+
+export = WebViewWorker;

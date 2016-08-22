@@ -1,5 +1,5 @@
 import MainWorker from "../src/MainWorker";
-import WebViewWorker from "../src/WebViewWorker";
+import WebViewWorker = require("../src/WebViewWorker");
 
 let webViewWorker: WebViewWorker;
 function sendToWebView(message: string) {

@@ -7,7 +7,7 @@ module.exports = {
     filename: "webViewWorker.js",
 
     libraryTarget: "var",
-    library: "MainWorker"
+    library: "WebViewWorker"
   },
 
   resolve: {

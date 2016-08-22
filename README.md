@@ -16,7 +16,7 @@ and
 
 ## Usage
 
-In your main thread:
+### In your main thread:
 
 ```javascript
 import {MainWorker} from 'webview-crypto'
@@ -32,18 +32,19 @@ var mw = new MainWorker(sendToWebView) // optional second argument for debug on 
 mw.crypto.subtle.generateKey(...)
 ```
 
+### In the webview:
 
-In the webview:
+Either include the script `node_modules/webview-crypto/webViewWorker.js` as a `script`
+or get the string of the javascript from `import {WebViewWorkerSource} from 'webview-crypto'`
+and load that string.
+
+
+Then in the webview (after loading this javascript):
 
 ```javascript
-import {WebViewWorkerSource} from 'webview-crypto'
-
-// WebViewWorkerSource contains the JS source defining a `WebViewWorker.default`
-// should be instatiated like this:
-var wvw = new WebViewWorker.default(sendToMain)
+var wvw = new WebViewWorker(sendToMain)
 // wvw.onMainMessage should be called whenever there is a message from the main.
 ```
-
 
 
 ## Caveats

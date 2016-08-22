@@ -18,7 +18,8 @@
   "files": [
     "dist",
     "src",
-    "lib"
+    "lib",
+    "webViewWorker.js"
   ],
   "author": "Saul Shanabrook",
   "license": "MIT",

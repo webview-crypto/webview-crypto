@@ -7,7 +7,8 @@
   },
   "description": "Helper code for crypto polyfil in a webview ",
   "scripts": {
-    "prepublish": "webpack && ./build-webViewWorkerString.bash && tsc",
+    "prepublish": "rm -rf dist src/webViewWorkerString.ts webViewWorker.js && webpack && ./build-webViewWorkerString.bash && tsc && npm run babel",
+    "babel": "./node_modules/.bin/babel dist --plugins transform-runtime --presets es2015  --source-maps inline --out-dir dist",
     "test:typings:install": "cd test; typings install",
     "test:lint": "tsc && cd test; tsc",
     "test": "cd test; zuul --no-coverage --browser-name ${BROWSER_NAME} --browser-version ${BROWSER_VERSION} -- testAll.ts",
@@ -24,12 +25,15 @@
   "author": "Saul Shanabrook",
   "license": "MIT",
   "dependencies": {
+    "babel-runtime": "6.11.6",
     "lodash": "4.13.1",
     "serialize-error": "2.0.0"
   },
   "devDependencies": {
+    "babel-cli": "6.11.4",
     "babel-core": "6.10.4",
     "babel-loader": "6.2.4",
+    "babel-plugin-transform-runtime": "6.12.0",
     "babel-polyfill": "6.9.1",
     "babel-preset-react-native": "1.9.0",
     "imports-loader": "0.6.5",

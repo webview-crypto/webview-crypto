@@ -138,7 +138,7 @@ const CryptoKeySerializer: Serializer<CryptoKeyWithData | CryptoKey, CryptoKeySe
   toObject: async (ck) => {
     // if we have no crypto, then just export the cryptokey as is,
     // should still be serialized
-    if ((window.crypto as any).fake) {
+    if ((crypto as any).fake) {
       const newCk = clone(ck) as CryptoKeySerialized;
       newCk.serialized = true;
       return newCk;
@@ -156,7 +156,7 @@ const CryptoKeySerializer: Serializer<CryptoKeyWithData | CryptoKey, CryptoKeySe
   fromObject: async (cks: CryptoKeySerialized) => {
     // if we don't have access to to a real crypto implementation, just return
     // the serialized crypto key
-    if ((window.crypto as any).fake) {
+    if ((crypto as any).fake) {
       const newCks = clone(cks) as CryptoKeySerialized;
       delete newCks.serialized;
       return newCks;

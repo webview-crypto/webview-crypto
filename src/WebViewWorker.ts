@@ -23,7 +23,7 @@ class WebViewWorker {
 
     try {
       if (method === "getRandomValues") {
-        value = window.crypto.getRandomValues(args[0]);
+        value = crypto.getRandomValues(args[0]);
 
       } else {
         const methodName = method.split(".")[1];

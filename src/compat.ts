@@ -1,3 +1,3 @@
 export function subtle(): SubtleCrypto {
-  return window.crypto.subtle || (window.crypto as any).webkitSubtle;
+  return crypto.subtle || (crypto as any).webkitSubtle;
 }

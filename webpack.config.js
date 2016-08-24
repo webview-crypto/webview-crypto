@@ -23,6 +23,7 @@ module.exports = {
   },
 
   plugins: [
+    failPlugin,
     new webpack.optimize.UglifyJsPlugin({
       compress: true,
       mangle: true,

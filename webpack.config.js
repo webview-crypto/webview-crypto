@@ -21,7 +21,9 @@ module.exports = {
       { test: /\.tsx?$/, loader: "babel-loader?presets[]=react-native!ts-loader" }
     ]
   },
-
+  ts: {
+    configFileName: "tsconfig.webViewWorker.json"
+  },
   plugins: [
     failPlugin,
     new webpack.optimize.UglifyJsPlugin({

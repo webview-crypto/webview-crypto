@@ -14,6 +14,10 @@ This is used in
 and
 [`nativescript-webview-crypto`](https://github.com/saulshanabrook/nativescript-webview-crypto).
 
+## Tests
+
+Run `npm run test:local` to run the tests in a local browser.
+
 ## Usage
 
 ### In your main thread:

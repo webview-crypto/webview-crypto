@@ -89,6 +89,9 @@ export default class MainWorker {
   onWebViewMessage (message): void {
     // first message just tells us the webview is ready
     if (!this.readyToSend) {
+      if (this.debug) {
+        console.log("[webview-crypto] Got first message; ready to send");
+      };
       this.readyToSend = true;
       for (let m of this.toSend) {
         this.sendToWebView(m);

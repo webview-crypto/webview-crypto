@@ -62,10 +62,11 @@ export default class MainWorker {
 
   get crypto(): Crypto {
     const callMethod = this.callMethod;
-    return {
+    return ({
       subtle: this.subtle,
-      getRandomValues: this.getRandomValues.bind(this)
-    };
+      getRandomValues: this.getRandomValues.bind(this),
+      fake: true
+    } as any);
   }
 
   private get subtle(): SubtleCrypto {

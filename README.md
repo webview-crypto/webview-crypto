@@ -6,52 +6,106 @@
 
 ![Build Status](https://saucelabs.com/browser-matrix/sshanabrook.svg)
 
-Helper tools to polyfill the [Web Cryptography API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API)
-by using a webview.
+This repo provides some helper tools to run the [Web Cryptography API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API)
+in a WebView.
 
-This is used in
+It is used in
 [`react-native-webview-crypto`](https://github.com/saulshanabrook/react-native-webview-crypto)
 and
-[`nativescript-webview-crypto`](https://github.com/saulshanabrook/nativescript-webview-crypto).
+[`nativescript-webview-crypto`](https://github.com/saulshanabrook/nativescript-webview-crypto). It is not meant to be used directly, but simply serves as a common building
+block for those two libraries.
+
+## Why?
+
+The [Web Cryptography API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API)
+is [implemented in all major browsers](http://caniuse.com/#feat=cryptography)
+and provides performant and secure way of doing client side encryption in
+JavaScript. However it is not supported in NativeScript or React Native, which
+limits them from using Javascript libraries that depend on Web Crypto.
+
+Luckily, the iOS and Android browser engines do support this API.
+We can use their implementations by creating a WebView and communicating
+with it asynchronously.
+
+## Usage
+We provide two entrypoints in this repo.
+
+### Main Thread
+
+`MainWorker` is used in your main thread. It communicates to the WebView
+asynchronously with string messages, providing a `crypto` attribute
+that fulfills the [`Crypto`](https://developer.mozilla.org/en-US/docs/Web/API/Crypto)
+interface. If you set this to be globally defined, all applications that depend
+on `window.crypto` will work transperently.
+
+```javascript
+import {MainWorker} from "webview-crypto";
+
+function sendToWebView(message: string): void {
+  // sends `message` to the webview
+}
+
+var mw = new MainWorker(sendToWebView); // optional second argument for debug on or off
+
+// call `mw.onWebViewMessage` whenever you get a message from the WebView
+onWebViewMessage(mv.onWebViewMessage.bind(mv));
+
+mw.crypto.subtle.generateKey(
+  // whatever
+)
+
+window.crypto = mw.crypto;
+```
+
+### WebView
+
+`WebViewWorkerSource` is a string that contains the source defining
+a `WebViewWorker` constructor that should be used in your WebView.
+
+After loading that Javascript in the WebView, initialize
+`WebViewWorker` so that it can communicate with the main thread and do the
+work of executing the cryptography.
+
+```javascript
+
+function sendToMain(message: string): void {
+  // send `message` to the main thread
+}
+var wvw = new WebViewWorker(sendToMain);
+
+// call `wvw.onMainMessage` whenever you get a message from the main thread
+onMainMessage(wvw.onMainMessage.bind(wvw));
+```
 
 ## Tests
 
-Run `npm run test:local` to run the tests in a local browser.
+We have some unit tests for basic behavior here.
+Run `npm run test:local` to run them in a local browser.
+They run on iOS, Android, and Chrome in Travis CI through SauceLabs.
 
-## Usage
+While these tests do help catch some bugs, they do not provide any strong
+reassurance that this library will work in React Native and Typescript. That's
+because on those platforms, half the code is running in a WebView and the
+other half in their native JavaScript engine, which is either JavaScriptCore or
+V8. I haven't come up with a way to test this in an automated fashion.
 
-### In your main thread:
+So in addition to local unit tests, all code changes that might break something
+should be tested against the example repos ([React Native](https://github.com/saulshanabrook/react-native-webview-crypto-example)
+and [NativeScript](https://github.com/saulshanabrook/nativescript-webview-crypto-example))
+on both iOS and Android.
 
-```javascript
-import {MainWorker} from 'webview-crypto'
-
-// sendToWebView is a function which is called with a string to send
-// to the webview
-var mw = new MainWorker(sendToWebView) // optional second argument for debug on or off
-
-// mw.onWebViewMessage should be called whenever you get a message
-// from the webview
-
-
-mw.crypto.subtle.generateKey(...)
-```
-
-### In the webview:
-
-Either include the script `node_modules/webview-crypto/webViewWorker.js` as a `script`
-or get the string of the javascript from `import {WebViewWorkerSource} from 'webview-crypto'`
-and load that string.
-
-
-Then in the webview (after loading this javascript):
-
-```javascript
-var wvw = new WebViewWorker(sendToMain)
-// wvw.onMainMessage should be called whenever there is a message from the main.
-```
-
+I welcome suggestions on improving this process and making it more automated.
 
 ## Caveats
+While this attempts to as stick to the Web Cryptography API as possible,
+this is impossible in a few situations due to the differing browser
+implementations.
+
+### Incomplete Support
+This library is limited by the mobile browser's support. On iOS, the WebView's
+use WebKit, which has limited and incomplete support ([example](https://bugs.webkit.org/show_bug.cgi?id=151308)).
+If something isn't working, that might be why. Try it on Safari and see if it
+works there.
 
 ### `getRandomValues`
 
@@ -63,8 +117,8 @@ bridge to respond asynchronously before returning a value.
 
 Instead, we return you a promise that resolves to a `TypedArray`.
 We also accept these promises on all `crypto.subtle` methods that takes in
-`TypedArray`s, to make it transperent and will automatically wait for
-them to resolve before asking the webview execute the method.
+`TypedArray`s, to make it transparent and will automatically wait for
+them to resolve before asking the WebView execute the method.
 
 ### `CryptoKey`
 Since [JavaScriptCore](https://facebook.github.io/react-native/docs/javascript-environment.html#javascript-runtime)

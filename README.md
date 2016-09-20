@@ -15,6 +15,9 @@ and
 [`nativescript-webview-crypto`](https://github.com/saulshanabrook/nativescript-webview-crypto). It is not meant to be used directly, but simply serves as a common building
 block for those two libraries.
 
+
+*This project is funded by [Burke Software and Consulting LLC](http://burkesoftware.com/) for [passit](http://passit.io/). We are available for hire for any improvement and integration needs on this project. Open an issue to start a conversation or email info @ burke software dot com.*
+
 ## Why?
 
 The [Web Cryptography API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API)

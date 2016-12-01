@@ -10,10 +10,10 @@ This repo provides some helper tools to run the [Web Cryptography API](https://d
 in a WebView.
 
 It is used in
-[`react-native-webview-crypto`](https://github.com/saulshanabrook/react-native-webview-crypto)
-and
-[`nativescript-webview-crypto`](https://github.com/saulshanabrook/nativescript-webview-crypto). It is not meant to be used directly, but simply serves as a common building
-block for those two libraries.
+[`react-native-webview-crypto`](https://github.com/saulshanabrook/react-native-webview-crypto),
+[`nativescript-webview-crypto`](https://github.com/saulshanabrook/nativescript-webview-crypto), and 
+[`nativescript-angular-webview-crypto`](https://github.com/saulshanabrook/nativescript-angular-webview-crypto). It is not meant to be used directly, but simply serves as a common building
+block for those libraries.
 
 
 *This project is funded by [Burke Software and Consulting LLC](http://burkesoftware.com/) for [passit](http://passit.io/). We are available for hire for any improvement and integration needs on this project. Open an issue to start a conversation or email info @ burke software dot com.*

@@ -101,14 +101,14 @@ export default class MainWorker {
     }
     parse(message).then(({id, value, reason}) => {
       if (this.debug) {
-        console.log("[webview-crypto] Received message", {
+        console.log("[webview-crypto] Received message:", JSON.stringify({
           id,
           value,
           reason
-        });
+        }));
       };
       if (!id) {
-        console.warn("[webview-crypto] no ID passed back from message:", reason);
+        console.warn("[webview-crypto] no ID passed back from message:", JSON.stringify(reason));
         return;
       }
       const {resolve, reject} = this.messages[id];
@@ -119,7 +119,7 @@ export default class MainWorker {
       }
       delete this.messages[id];
     }).catch((reason) => {
-      console.warn("[webview-crypto] error in `parse` of message:", message, "reason:", reason);
+      console.warn("[webview-crypto] error in `parse` of message:", message, "reason:", JSON.stringify(reason));
     });
   }
 
@@ -133,11 +133,11 @@ export default class MainWorker {
     });
     const payloadObject = {method, id, args};
     if (this.debug) {
-      console.log("[webview-crypto] Sending message", {
+      console.log("[webview-crypto] Sending message:", JSON.stringify({
         method,
         args,
         payloadObject
-      });
+      }));
     };
     stringify(payloadObject, waitForArrayBufferView)
       .then((message) => {

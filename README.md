@@ -11,7 +11,7 @@ in a WebView.
 
 It is used in
 [`react-native-webview-crypto`](https://github.com/saulshanabrook/react-native-webview-crypto),
-[`nativescript-webview-crypto`](https://github.com/saulshanabrook/nativescript-webview-crypto), and 
+[`nativescript-webview-crypto`](https://github.com/saulshanabrook/nativescript-webview-crypto), and
 [`nativescript-angular-webview-crypto`](https://github.com/saulshanabrook/nativescript-angular-webview-crypto). It is not meant to be used directly, but simply serves as a common building
 block for those libraries.
 
@@ -84,7 +84,8 @@ onMainMessage(wvw.onMainMessage.bind(wvw));
 
 We have some unit tests for basic behavior here.
 Run `npm run test:local` to run them in a local browser.
-They run on iOS, Android, and Chrome in Travis CI through SauceLabs.
+
+In Travis CI, they run on iOS, Android, and Chrome through SauceLabs.
 
 While these tests do help catch some bugs, they do not provide any strong
 reassurance that this library will work in React Native and Typescript. That's

@@ -8,7 +8,8 @@
   "description": "Helper code for crypto polyfil in a webview ",
   "scripts": {
     "prepublish": "rm -rf dist src/webViewWorkerString.ts webViewWorker.js && webpack && ./build-webViewWorkerString.bash && tsc && npm run babel",
-    "babel": "./node_modules/.bin/babel dist --plugins transform-runtime --presets es2015  --source-maps inline --out-dir dist",
+    "postinstall": "npm run test:typings:install",
+    "babel": "babel dist --plugins transform-runtime --presets es2015  --source-maps inline --out-dir dist",
     "test:typings:install": "cd test; typings install",
     "test:lint": "tsc && cd test; tsc",
     "test": "cd test; zuul --no-coverage --browser-name ${BROWSER_NAME} --browser-version ${BROWSER_VERSION} -- testAll.ts",

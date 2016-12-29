@@ -1,6 +1,7 @@
 import * as test from "tape";
 import crypto from "./mockCrypto";
 
+declare const TextEncoder: any;
 test("Methods exist", function (t) {
   t.equal(typeof crypto.getRandomValues, "function");
   t.equal(typeof crypto.subtle.encrypt, "function");
@@ -151,3 +152,103 @@ test("example from https://blog.engelke.com/2014/06/22/symmetric-cryptography-in
   t.equal(decryptedString, "This is very sensitive stuff.");
   t.end();
 });
+
+
+// from https://blog.engelke.com/2014/06/22/symmetric-cryptography-in-the-browser-part-1/
+test("symmetric encryption should work", async (t) => {
+  const aesKey = await crypto.subtle.generateKey(
+      ({name: "AES-CBC", length: 128} as Algorithm), // Algorithm the key will be used with
+      true,                           // Can extract key value to binary string
+      ["encrypt", "decrypt"]          // Use for these operations
+  );
+  const iv = crypto.getRandomValues(new Uint8Array(16));
+
+  const plainTextString = "This is very sensitive stuff.";
+
+  const plainTextBytes = new Uint8Array(plainTextString.length);
+  for (let i = 0; i < plainTextString.length; i++) {
+      plainTextBytes[i] = plainTextString.charCodeAt(i);
+  }
+
+  const cipherTextBytes = await crypto.subtle.encrypt(
+      ({name: "AES-CBC", iv: iv} as Algorithm), // Random data for security
+      aesKey,                    // The key to use
+      plainTextBytes             // Data to encrypt
+  );
+
+  const decryptedBytes = new Uint8Array(
+      await crypto.subtle.decrypt(
+        ({name: "AES-CBC", iv: iv} as Algorithm), // Same IV as for encryption
+        aesKey,                    // The key to use
+        cipherTextBytes            // Data to decrypt
+    )
+  );
+
+  let decryptedString = "";
+  for (let i = 0; i < decryptedBytes.byteLength; i++) {
+      decryptedString += String.fromCharCode(decryptedBytes[i]);
+  }
+  t.equal(decryptedString, "This is very sensitive stuff.");
+  t.end();
+});
+
+
+// from https://blog.engelke.com/2015/02/14/deriving-keys-from-passwords-with-webcrypto/
+function arrayBufferToHexString(arrayBuffer: ArrayBuffer): string {
+  const byteArray = new Uint8Array(arrayBuffer);
+  let hexString = "";
+  let nextHexByte;
+
+  for (let i=0; i<byteArray.byteLength; i++) {
+      nextHexByte = byteArray[i].toString(16);
+      if (nextHexByte.length < 2) {
+          nextHexByte = "0" + nextHexByte;
+      }
+      hexString += nextHexByte;
+  }
+  return hexString;
+}
+
+function stringToArrayBuffer(str: string): ArrayBuffer {
+  var encoder = new TextEncoder("utf-8");
+  return encoder.encode(str);
+  // http://stackoverflow.com/a/11058858/907060
+  // const buf = new ArrayBuffer(str.length*2); // 2 bytes for each char
+  // const bufView = new Uint16Array(buf);
+  // for (let i=0, strLen=str.length; i<strLen; i++) {
+  //   bufView[i] = str.charCodeAt(i);
+  // }
+  // return buf;
+}
+
+test("deriving keys should work", async (t) => {
+  const saltString = "Pick anything you want. This isn't secret.";
+  const iterations = 1000;
+  const hash = "SHA-256";
+  const password = "My secret!"
+
+  const baseKey = await crypto.subtle.importKey(
+    "raw",
+    stringToArrayBuffer(password),
+    {"name": "PBKDF2"},
+    false,
+    ["deriveKey"]
+  )
+
+  const aesKey = await window.crypto.subtle.deriveKey(
+    {
+      "name": "PBKDF2",
+      "salt": stringToArrayBuffer(saltString),
+      "iterations": iterations,
+      "hash": hash
+    },
+    baseKey,
+    {"name": "AES-CBC", "length": 128}, // Key we want
+    true,                               // Extrable
+    ["encrypt", "decrypt"]              // For new key
+  );
+  const keyBytes = await window.crypto.subtle.exportKey("raw", aesKey);
+  const hexKey = arrayBufferToHexString(keyBytes);
+  t.equal(hexKey, "ed4b134e89eff7e9366af4abd5c6fb38");
+  t.end();
+})

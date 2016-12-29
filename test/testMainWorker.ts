@@ -227,13 +227,19 @@ test("deriving keys should work", async (t) => {
   const hash = "SHA-256";
   const password = "My secret!"
 
-  const baseKey = await crypto.subtle.importKey(
-    "raw",
-    stringToArrayBuffer(password),
-    {"name": "PBKDF2"},
-    false,
-    ["deriveKey"]
-  )
+  let baseKey: CryptoKey;
+  try {
+    baseKey = await crypto.subtle.importKey(
+      "raw",
+      stringToArrayBuffer(password),
+      {"name": "PBKDF2"},
+      false,
+      ["deriveKey"]
+    )
+  } catch(e) {
+    t.end();
+    return;
+  }
 
   const aesKey = await window.crypto.subtle.deriveKey(
     {

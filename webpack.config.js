@@ -2,9 +2,9 @@ var failPlugin = require('webpack-fail-plugin');
 var webpack = require('webpack');
 
 module.exports = {
-  entry: ['babel-polyfill', './src/WebViewWorker'],
+  entry: ['./src/WebViewWorker'],
   output: {
-    filename: "webViewWorker.js",
+    filename: "src/webViewWorker.js",
 
     libraryTarget: "var",
     library: "WebViewWorker"
@@ -18,7 +18,7 @@ module.exports = {
   module: {
     loaders: [
       // All files with a '.ts' or '.tsx' extension will be handled by 'ts-loader'.
-      { test: /\.tsx?$/, loader: "babel-loader?presets[]=react-native!ts-loader" }
+      { test: /\.tsx?$/, loader: "ts-loader" }
     ]
   },
   ts: {

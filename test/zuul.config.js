@@ -1,5 +1,3 @@
-var webpack = require("./webpack.config");
-
 var config = {
   ui: "tape",
   tunnel: {
@@ -20,8 +18,7 @@ var config = {
       version: "latest"
     }
   ],
-  builder: 'zuul-builder-webpack',
-  webpack: webpack
+  server: "tsc --watch",
 };
 
 module.exports = config;

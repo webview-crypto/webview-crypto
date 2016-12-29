@@ -1,22 +1,22 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "es5",
     "module": "commonjs",
     "moduleResolution": "node",
-    "outDir": "./dist/",
     "sourceMap": true,
-    "declaration": true
+    "declaration": true,
+    "lib": [
+      "dom",
+      "es2015.promise",
+      "es5"
+    ]
   },
-  "filesGlob": [
-    "src/*.ts"
-  ],
   "files": [
     "src/asyncSerialize.ts",
     "src/compat.ts",
     "src/index.ts",
     "src/MainWorker.ts",
     "src/serializeBinary.ts",
-    "src/WebViewWorker.ts",
     "src/webViewWorkerString.ts"
   ],
   "atom": {

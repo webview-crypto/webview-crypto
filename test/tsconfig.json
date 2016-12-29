@@ -1,30 +1,20 @@
 {
     "compilerOptions": {
-        "target": "es6",
+        "target": "es5",
         "module": "commonjs",
         "moduleResolution": "node",
-        "isolatedModules": false,
-        "jsx": "react",
-        "outDir": "./dist/",
         "sourceMap": true,
-        "experimentalDecorators": true,
-        "emitDecoratorMetadata": true,
-        "declaration": true,
-        "noImplicitAny": false,
-        "noImplicitUseStrict": false,
-        "removeComments": true,
-        "noLib": false,
-        "preserveConstEnums": true,
-        "suppressImplicitAnyIndexErrors": false
+        "lib": [
+          "dom",
+          "es2015.promise",
+          "es5"
+        ]
     },
     "files": [
-        "typings/index.d.ts",
         "mockCrypto.ts",
         "testSerializeBinary.ts",
         "testAsyncSerialize.ts",
         "testMainWorker.ts",
         "testAll.ts"
-    ],
-    "compileOnSave": false,
-    "buildOnSave": false
+    ]
 }

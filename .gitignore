@@ -1,6 +1,9 @@
 node_modules
-typings
-dist
 src/*String.ts
-webViewWorker.js
+*.js
+!*webpack.config.js
+!test/zuul.config.js
+
+*.d.ts
+*.map
 npm-debug.log

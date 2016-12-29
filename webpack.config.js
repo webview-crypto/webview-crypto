@@ -1,10 +1,11 @@
 var failPlugin = require('webpack-fail-plugin');
 var webpack = require('webpack');
+var WebpackShellPlugin = require('webpack-shell-plugin');
 
 module.exports = {
   entry: ['./src/WebViewWorker'],
   output: {
-    filename: "src/webViewWorker.js",
+    filename: "src/webViewWorkerDist.js",
 
     libraryTarget: "var",
     library: "WebViewWorker"
@@ -31,6 +32,10 @@ module.exports = {
       mangle: true,
       comments: false,
       sourceMap: false
+    }),
+    new WebpackShellPlugin({
+      onBuildEnd:['./build-webViewWorkerString.bash'],
+      dev: false
     })
 	]
 };

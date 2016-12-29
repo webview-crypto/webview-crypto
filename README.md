@@ -83,7 +83,8 @@ onMainMessage(wvw.onMainMessage.bind(wvw));
 ## Tests
 
 We have some unit tests for basic behavior here.
-Run `npm run test:local` to run them in a local browser.
+Run `npm run test:local` to run them in a local browser. You also need to run
+`npm run build:watch` to recompute the `webViewWorkerString` injected as needed.
 
 In Travis CI, they run on iOS, Android, and Chrome through SauceLabs.
 

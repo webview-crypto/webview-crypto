@@ -4,7 +4,8 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "declaration": false,
-    "lib": ["dom", "es2015.promise", "es5"]
+    "lib": ["dom", "es2015.promise", "es5"],
+    "importHelpers": true
   },
   "files": [
     "src/asyncSerialize.ts",

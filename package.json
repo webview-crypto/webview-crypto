@@ -21,9 +21,10 @@
   "author": "Saul Shanabrook",
   "license": "MIT",
   "dependencies": {
-    "lodash": "4.17.3",
     "@types/lodash": "4.14.44",
-    "serialize-error": "2.1.0"
+    "lodash": "4.17.3",
+    "serialize-error": "2.1.0",
+    "tslib": "1.4.0"
   },
   "devDependencies": {
     "@types/tape": "4.2.28",

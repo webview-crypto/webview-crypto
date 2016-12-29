@@ -2,7 +2,6 @@ import {Serializer, toObjects, fromObjects} from "./asyncSerialize";
 import {subtle} from "./compat";
 
 declare var require: any;
-const clone = require("lodash/clone");
 
 declare const WebViewBridge: any;
 
@@ -119,7 +118,14 @@ function ArrayBufferViewSerializer(waitForPromise: boolean): Serializer<ArrayBuf
 }
 
 interface CryptoKeyWithData extends CryptoKey {
-  _jwk: string;
+  _import: {
+    format: string,
+    keyData: JsonWebKey | BufferSource,
+  };
+}
+
+function hasData(ck: CryptoKeyWithData | CryptoKey): ck is CryptoKeyWithData {
+  return (ck as CryptoKeyWithData)._import !== undefined;
 }
 
 interface CryptoKeySerialized extends CryptoKeyWithData {
@@ -136,16 +142,23 @@ const CryptoKeySerializer: Serializer<CryptoKeyWithData | CryptoKey, CryptoKeySe
     return isCryptoKey || isCryptoKeyWithData;
   },
   toObject: async (ck) => {
-    // if we have no crypto, then just export the cryptokey as is,
-    // should still be serialized
-    if ((crypto as any).fake) {
-      const newCk = clone(ck) as CryptoKeySerialized;
-      newCk.serialized = true;
-      return newCk;
+    // if we already have the import serialized, just return that
+    if (hasData(ck)) {
+      return {
+        serialized: true,
+        _import: ck._import,
+        type: ck.type,
+        extractable: ck.extractable,
+        algorithm: ck.algorithm,
+        usages: ck.usages
+      };
     }
     const jwk = await subtle().exportKey("jwk", ck);
     return {
-      _jwk: (jwk as any as string),
+      _import: {
+        format: "jwk",
+        keyData: jwk
+      },
       serialized: true,
       algorithm: ck.algorithm,
       extractable: ck.extractable,
@@ -157,16 +170,16 @@ const CryptoKeySerializer: Serializer<CryptoKeyWithData | CryptoKey, CryptoKeySe
     // if we don't have access to to a real crypto implementation, just return
     // the serialized crypto key
     if ((crypto as any).fake) {
-      const newCks = clone(cks) as CryptoKeySerialized;
+      const newCks = {...cks} as CryptoKeySerialized;
       delete newCks.serialized;
       return newCks;
     }
     return await subtle().importKey(
-      "jwk",
-      (cks._jwk as any), // for some reason TS wont let me put a string here
-      (cks.algorithm as any) ,
+      cks._import.format,
+      cks._import.keyData,
+      (cks.algorithm as any),
       cks.extractable,
-      cks.usages
+      cks.usages,
     );
   }
 };

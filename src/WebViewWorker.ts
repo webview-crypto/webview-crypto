@@ -29,6 +29,15 @@ class WebViewWorker {
         const methodName = method.split(".")[1];
         console.log(methodName, args);
         value = await subtle()[methodName].apply(subtle(), args);
+
+        // if we import a crypto key, we want to save how we imported it
+        // so we can send that back and re-create the key later
+        if (methodName === "importKey") {
+          value._import = {
+            format: args[0],
+            keyData: args[1]
+          }
+        }
       }
     } catch (e) {
       await this.send({id, reason: (serializeError as any)(e)});

@@ -1,5 +1,4 @@
 declare var require: any;
-const map = require("lodash/map");
 const find = require("lodash/find");
 
 export interface Serializer<T, S> {

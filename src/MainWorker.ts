@@ -1,5 +1,7 @@
 import {parse, stringify, ArrayBufferViewWithPromise} from "./serializeBinary";
 
+const serializeError: any = require("serialize-error");
+
 const SUBTLE_METHODS = [
   "encrypt",
   "decrypt",
@@ -108,7 +110,7 @@ export default class MainWorker {
         }));
       };
       if (!id) {
-        console.warn("[webview-crypto] no ID passed back from message:", JSON.stringify(reason));
+        console.warn("[webview-crypto] no ID passed back from message:", JSON.stringify(serializeError(reason)));
         return;
       }
       const {resolve, reject} = this.messages[id];
@@ -119,7 +121,7 @@ export default class MainWorker {
       }
       delete this.messages[id];
     }).catch((reason) => {
-      console.warn("[webview-crypto] error in `parse` of message:", message, "reason:", JSON.stringify(reason));
+      console.warn("[webview-crypto] error in `parse` of message:", JSON.stringify(message), "reason:", JSON.stringify(serializeError(reason)));
     });
   }
 

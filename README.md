@@ -131,7 +131,8 @@ does not support `window.Crypto`, it also doesn't have a `CryptoKey` interface.
 So instead of returning an actual `CryptoKey` from
 [`subtle.generateKey()`](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/generateKey)
 we instead return an object that confirms to the `CryptoKey` interface and has
-a `_jwk` property that has the value of the key exported as `jwk`. This allows
+a `_import` property that has the value of the key exported as `jwk` or using
+the value for importing the key. This allows
 you to treat the `CryptoKey` as you would normally, and whenever you need to use
 it in some `subtle` method, we will automatically convert it back to a real
-`CryptoKey` from the `_jwk` string and the metadata.
+`CryptoKey` from the `_import` string and the metadata.

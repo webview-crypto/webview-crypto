@@ -138,7 +138,7 @@ const CryptoKeySerializer: Serializer<CryptoKeyWithData | CryptoKey, CryptoKeySe
     const localStr = o.toLocaleString();
     // can't use CryptoKey or constructor on WebView iOS
     const isCryptoKey = localStr === "[object CryptoKey]" || localStr === "[object Key]";
-    const isCryptoKeyWithData = o._jwk && !o.serialized;
+    const isCryptoKeyWithData = o._import && !o.serialized;
     return isCryptoKey || isCryptoKeyWithData;
   },
   toObject: async (ck) => {

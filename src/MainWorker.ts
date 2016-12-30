@@ -82,8 +82,18 @@ export default class MainWorker {
   }
 
   private getRandomValues (array: ArrayBufferViewWithPromise): ArrayBufferViewWithPromise {
-    array._promise = this.callMethod("getRandomValues", [array], false);
-    array._promise.then((updatedArray: ArrayBufferView) => {
+    const promise = this.callMethod("getRandomValues", [array], false);
+
+    // make the _promise not enumerable so it isn't JSON stringified,
+    // which could lead to an infinite loop with Angular's zone promises
+    Object.defineProperty(array, "_promise", {
+      value: promise,
+      configurable: true,
+      enumerable: false,
+      writable: true
+    });
+
+    promise.then((updatedArray: ArrayBufferView) => {
       (array as any).set(updatedArray);
     });
     return array;

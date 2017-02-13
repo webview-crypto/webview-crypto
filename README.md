@@ -120,10 +120,14 @@ returns a value synchronously. It is simply *impossible* (as far as I know,
 please let me know if there any ways to get around this) to wait for the
 bridge to respond asynchronously before returning a value.
 
-Instead, we return you a promise that resolves to a `TypedArray`.
-We also accept these promises on all `crypto.subtle` methods that takes in
-`TypedArray`s, to make it transparent and will automatically wait for
-them to resolve before asking the WebView execute the method.
+Instead, we add a `_promise` attribute to the `TypedArray` you passed in. This resolves
+when the `TypedArray` has been filled with random values. 
+
+Also, on all `crypto.subtle` methods that takes in
+`TypedArray`s, we will automatically wait for it to resolve. This means that if you 
+are using the `TypedArray` in further cryptographic code, it will work transparently.
+So hopefully existing code that uses the Web Cryptography API will continue to work 
+without modification.
 
 ### `CryptoKey`
 Since [JavaScriptCore](https://facebook.github.io/react-native/docs/javascript-environment.html#javascript-runtime)

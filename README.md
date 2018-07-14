@@ -16,8 +16,6 @@ It is used in
 block for those libraries.
 
 
-*This project is funded by [Burke Software and Consulting LLC](http://burkesoftware.com/) for [passit](http://passit.io/). We are available for hire for any improvement and integration needs on this project. Open an issue to start a conversation or email info @ burke software dot com.*
-
 ## Why?
 
 The [Web Cryptography API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API)
@@ -140,3 +138,6 @@ the value for importing the key. This allows
 you to treat the `CryptoKey` as you would normally, and whenever you need to use
 it in some `subtle` method, we will automatically convert it back to a real
 `CryptoKey` from the `_import` string and the metadata.
+
+*This project was funded by [Burke Software and Consulting LLC](http://burkesoftware.com/) for [passit](http://passit.io/).*
+

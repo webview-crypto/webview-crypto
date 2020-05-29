@@ -124,7 +124,7 @@ export default class MainWorker {
         return;
       }
       const {resolve, reject} = this.messages[id];
-      if (value) {
+      if (!reason) {
         resolve(value);
       } else {
         reject(reason);

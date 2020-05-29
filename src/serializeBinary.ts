@@ -1,7 +1,7 @@
 import {Serializer, toObjects, fromObjects} from "./asyncSerialize";
 import {subtle} from "./compat";
 
-declare var require: any;
+declare var global: any;
 
 declare const WebViewBridge: any;
 

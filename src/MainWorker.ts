@@ -1,6 +1,6 @@
 import {parse, stringify, ArrayBufferViewWithPromise} from "./serializeBinary";
 
-const serializeError: any = require("serialize-error");
+import {serializeError} from "serialize-error";
 
 const SUBTLE_METHODS = [
   "encrypt",

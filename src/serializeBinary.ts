@@ -112,7 +112,7 @@ function ArrayBufferViewSerializer(waitForPromise: boolean): Serializer<ArrayBuf
       };
     },
     fromObject: async (abvs: ArrayBufferViewSerialized) => {
-      return eval(`new ${abvs.name}(abvs.buffer)`);
+      return new global[abvs.name](abvs.buffer);
     }
   };
 }

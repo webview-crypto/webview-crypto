@@ -4,17 +4,17 @@ const find = require("lodash/find");
 export interface Serializer<T, S> {
   id: string;
   isType: (o: any) => boolean;
-  toObject?: (t: T) => Promise<S>;
+  toObject?: (t: T, b?: number, l?: number) => Promise<S>;
   fromObject?: (o: S) => Promise<T>;
 }
 
-class Serialized {
+export interface Serialized {
   __serializer_id: string;
   value: any;
 }
 
 function isSerialized(object: any): object is Serialized {
-    return object.hasOwnProperty("__serializer_id");
+  return object.hasOwnProperty("__serializer_id");
 }
 
 export async function toObjects(serializers: Serializer<any, any>[], o: any): Promise<any> {

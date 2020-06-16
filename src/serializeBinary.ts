@@ -1,7 +1,7 @@
-import {Serializer, toObjects, fromObjects} from "./asyncSerialize";
+import {Serializer, Serialized, toObjects, fromObjects} from "./asyncSerialize";
 import {subtle} from "./compat";
 
-declare var require: any;
+declare var global: any;
 
 declare const WebViewBridge: any;
 
@@ -34,8 +34,8 @@ const ArrayBufferSerializer: Serializer<ArrayBuffer, string> = {
 
   // from https://developers.google.com/web/updates/2012/06/How-to-convert-ArrayBuffer-to-and-from-String
   // modified to use Int8Array so that we can hold odd number of bytes
-  toObject: async (ab: ArrayBuffer) => {
-    return String.fromCharCode.apply(null, new Int8Array(ab));
+  toObject: async (ab: ArrayBuffer, b = 0, l = ab.byteLength) => {
+    return String.fromCharCode.apply(null, new Int8Array(ab, b, l));
   },
   fromObject: async (data: string) => {
     const buf = new ArrayBuffer(data.length);
@@ -49,14 +49,14 @@ const ArrayBufferSerializer: Serializer<ArrayBuffer, string> = {
 
 interface ArrayBufferViewSerialized {
   name: string;
-  buffer: ArrayBuffer;
+  buffer: Serialized;
 }
 
 export interface ArrayBufferViewWithPromise extends ArrayBufferView {
   _promise?: Promise<ArrayBufferView>;
 }
 function isArrayBufferViewWithPromise(obj: any): obj is ArrayBufferViewWithPromise {
-    return obj.hasOwnProperty("_promise");
+  return obj.hasOwnProperty("_promise");
 }
 
 // Normally we could just do `abv.constructor.name`, but in
@@ -108,7 +108,10 @@ function ArrayBufferViewSerializer(waitForPromise: boolean): Serializer<ArrayBuf
       }
       return {
         name: arrayBufferViewName(abv),
-        buffer: abv.buffer
+        buffer: {
+          __serializer_id: ArrayBufferSerializer.id,
+          value: await ArrayBufferSerializer.toObject(abv.buffer, abv.byteOffset, abv.byteLength)
+        }
       };
     },
     fromObject: async (abvs: ArrayBufferViewSerialized) => {

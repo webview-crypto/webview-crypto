@@ -34,7 +34,7 @@ const ArrayBufferSerializer: Serializer<ArrayBuffer, string> = {
 
   // from https://developers.google.com/web/updates/2012/06/How-to-convert-ArrayBuffer-to-and-from-String
   // modified to use Int8Array so that we can hold odd number of bytes
-  toObject: async (ab: ArrayBuffer, b, l) => {
+  toObject: async (ab: ArrayBuffer, b = 0, l = ab.byteLength) => {
     return String.fromCharCode.apply(null, new Int8Array(ab, b, l));
   },
   fromObject: async (data: string) => {

@@ -23,7 +23,7 @@ module.exports = {
     ]
   },
   ts: {
-    configFileName: "tsconfig.webViewWorker.json"
+    configFile: "tsconfig.webViewWorker.json"
   },
   plugins: [
     failPlugin,

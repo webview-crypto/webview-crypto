@@ -1,4 +1,4 @@
-import * as test from "tape";
+import test = require("tape");
 import crypto from "./mockCrypto";
 
 declare const TextEncoder: any;
@@ -61,8 +61,8 @@ for (const hash of [
       ["encrypt", "decrypt"] //  can be any combination of "sign" and "verify"
     );
     t.true(key);
-    t.true(key.publicKey);
-    t.true(key.privateKey);
+    t.true('publicKey' in key && key.publicKey);
+    t.true('privateKey' in key && key.privateKey);
     t.end();
   });
 
@@ -72,6 +72,7 @@ for (const hash of [
       true, //  whether the key is extractable (i.e. can be used in exportKey)
       ["encrypt", "decrypt"] //  can be any combination of "sign" and "verify"
     );
+    if (!('publicKey' in key)) throw new Error("no public key");
     const keydata = await crypto.subtle.exportKey(
       "jwk", // can be "jwk" (public or private), "spki" (public only), or "pkcs8" (private only)
       key.publicKey // can be a publicKey or privateKey, as long as extractable was true
@@ -86,6 +87,7 @@ for (const hash of [
       true, //  whether the key is extractable (i.e. can be used in exportKey)
       ["encrypt", "decrypt"] //  can be any combination of "sign" and "verify"
     );
+    if (!('publicKey' in key)) throw new Error("no public key");
     const encrypted = await crypto.subtle.encrypt(
       RSA_OAEP,
       key.publicKey, // from generateKey or importKey above
@@ -101,6 +103,7 @@ for (const hash of [
       true, //  whether the key is extractable (i.e. can be used in exportKey)
       ["encrypt", "decrypt"] //  can be any combination of "sign" and "verify"
     );
+    if (!('publicKey' in key)) throw new Error("no public key");
     const encrypted = await crypto.subtle.encrypt(
       RSA_OAEP,
       key.publicKey, // from generateKey or importKey above
@@ -122,6 +125,7 @@ test("example from https://blog.engelke.com/2014/06/22/symmetric-cryptography-in
       true,                           // Can extract key value to binary string
       ["encrypt", "decrypt"]          // Use for these operations
   );
+  if (!('algorithm' in aesKey)) throw new Error("no algorithm");
   const iv = crypto.getRandomValues(new Uint8Array(16));
 
   const plainTextString = "This is very sensitive stuff.";
@@ -161,6 +165,7 @@ test("symmetric encryption should work", async (t) => {
       true,                           // Can extract key value to binary string
       ["encrypt", "decrypt"]          // Use for these operations
   );
+  if (!('algorithm' in aesKey)) throw new Error("no algorithm");
   const iv = crypto.getRandomValues(new Uint8Array(16));
 
   const plainTextString = "This is very sensitive stuff.";

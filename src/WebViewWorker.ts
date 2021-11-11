@@ -1,8 +1,6 @@
+import serializeError = require("serialize-error");
 import {parse, stringify} from "../src/serializeBinary";
 import {subtle} from "../src/compat";
-
-declare var require: any;
-const serializeError: any = require("serialize-error");
 
 class WebViewWorker {
   constructor(private sendToMain: (message: string) => void) {

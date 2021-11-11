@@ -1,4 +1,4 @@
-import * as test from "tape";
+import test = require("tape");
 import {parse, stringify} from "../src/serializeBinary";
 
 test("Parsing and serailizing work together", async function (t) {

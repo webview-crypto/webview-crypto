@@ -1,5 +1,4 @@
-declare var require: any;
-const find = require("lodash/find");
+import find = require("lodash/find");
 
 export interface Serializer<T, S> {
   id: string;
@@ -8,7 +7,7 @@ export interface Serializer<T, S> {
   fromObject?: (o: S) => Promise<T>;
 }
 
-class Serialized {
+interface Serialized {
   __serializer_id: string;
   value: any;
 }

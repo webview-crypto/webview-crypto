@@ -1,8 +1,6 @@
 import {Serializer, toObjects, fromObjects} from "./asyncSerialize";
 import {subtle} from "./compat";
 
-declare var require: any;
-
 declare const WebViewBridge: any;
 
 export async function parse(text: string): Promise<any> {
@@ -48,7 +46,7 @@ const ArrayBufferSerializer: Serializer<ArrayBuffer, string> = {
 };
 
 interface ArrayBufferViewSerialized {
-  name: string;
+  name: 'Int8Array' | 'Uint8Array' | 'Uint8ClampedArray' | 'Int16Array' | 'Uint16Array' | 'Int32Array' | 'Uint32Array' | 'Float32Array' | 'Float64Array' | 'DataView';
   buffer: ArrayBuffer;
 }
 
@@ -62,7 +60,7 @@ function isArrayBufferViewWithPromise(obj: any): obj is ArrayBufferViewWithPromi
 // Normally we could just do `abv.constructor.name`, but in
 // JavaScriptCore, this wont work for some weird reason.
 // list from https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView
-function arrayBufferViewName(abv: ArrayBufferView): string {
+function arrayBufferViewName(abv: ArrayBufferView): ArrayBufferViewSerialized['name'] {
   if (abv instanceof Int8Array) {
     return "Int8Array";
   }
@@ -112,15 +110,39 @@ function ArrayBufferViewSerializer(waitForPromise: boolean): Serializer<ArrayBuf
       };
     },
     fromObject: async (abvs: ArrayBufferViewSerialized) => {
-      return new global[abvs.name](abvs.buffer);
+      switch (abvs.name) {
+        case "Int8Array":
+          return new Int8Array(abvs.buffer);
+        case "Uint8Array":
+          return new Uint8Array(abvs.buffer);
+        case "Uint8ClampedArray":
+          return new Uint8ClampedArray(abvs.buffer);
+        case "Int16Array":
+          return new Int16Array(abvs.buffer);
+        case "Uint16Array":
+          return new Uint16Array(abvs.buffer);
+        case "Int32Array":
+          return new Int32Array(abvs.buffer);
+        case "Uint32Array":
+          return new Uint32Array(abvs.buffer);
+        case "Float32Array":
+          return new Float32Array(abvs.buffer);
+        case "Float64Array":
+          return new Float64Array(abvs.buffer);
+        case "DataView":
+          return new DataView(abvs.buffer);
+      }
     }
   };
 }
 
 interface CryptoKeyWithData extends CryptoKey {
   _import: {
-    format: string,
-    keyData: JsonWebKey | BufferSource,
+    format: 'jwk'
+    keyData: JsonWebKey
+  } | {
+    format: Exclude<KeyFormat, "jwk">,
+    keyData: BufferSource,
   };
 }
 
@@ -174,12 +196,10 @@ const CryptoKeySerializer: Serializer<CryptoKeyWithData | CryptoKey, CryptoKeySe
       delete newCks.serialized;
       return newCks;
     }
-    return await subtle().importKey(
-      cks._import.format,
-      cks._import.keyData,
-      (cks.algorithm as any),
-      cks.extractable,
-      cks.usages,
-    );
+    if (cks._import.format === "jwk") {
+      return await subtle().importKey(cks._import.format, cks._import.keyData, cks.algorithm, cks.extractable, cks.usages);
+    } else {
+      return await subtle().importKey(cks._import.format, cks._import.keyData, cks.algorithm, cks.extractable, cks.usages);
+    }
   }
 };

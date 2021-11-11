@@ -1,4 +1,4 @@
-import * as test from "tape";
+import test = require("tape");
 import {Serializer, toObjects, fromObjects} from "../src/asyncSerialize";
 
 interface Thing {

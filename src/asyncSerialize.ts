@@ -1,4 +1,4 @@
-import find = require("lodash/find");
+import find from "lodash/find";
 
 export interface Serializer<T, S> {
   id: string;

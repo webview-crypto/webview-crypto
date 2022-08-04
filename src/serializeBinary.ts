@@ -1,5 +1,5 @@
-import {Serializer, toObjects, fromObjects} from "./asyncSerialize";
-import {subtle} from "./compat";
+import { Serializer, toObjects, fromObjects } from "./asyncSerialize";
+import { subtle } from "./compat";
 
 declare const WebViewBridge: any;
 
@@ -9,22 +9,26 @@ export async function parse(text: string): Promise<any> {
   const objects = JSON.parse(deocodedText);
   return await fromObjects(serializers(true), objects);
 }
-export async function stringify(value: any, waitForArrayBufferView = true): Promise<string> {
-  const serialized = await toObjects(serializers(waitForArrayBufferView), value);
+export async function stringify(
+  value: any,
+  waitForArrayBufferView = true
+): Promise<string> {
+  const serialized = await toObjects(
+    serializers(waitForArrayBufferView),
+    value
+  );
   // need encodeURIComponent so binary strings are transfered properly
   const message = JSON.stringify(serialized);
   return encodeURIComponent(message);
 }
 
-
 function serializers(waitForArrayBufferView: boolean) {
   return [
     ArrayBufferSerializer,
     ArrayBufferViewSerializer(waitForArrayBufferView),
-    CryptoKeySerializer
+    CryptoKeySerializer,
   ];
 }
-
 
 const ArrayBufferSerializer: Serializer<ArrayBuffer, string> = {
   id: "ArrayBuffer",
@@ -33,7 +37,9 @@ const ArrayBufferSerializer: Serializer<ArrayBuffer, string> = {
   // from https://developers.google.com/web/updates/2012/06/How-to-convert-ArrayBuffer-to-and-from-String
   // modified to use Int8Array so that we can hold odd number of bytes
   toObject: async (ab: ArrayBuffer) => {
-    return String.fromCharCode.apply(null, new Int8Array(ab));
+    return new Int8Array(ab).reduce(function (data, byte) {
+      return data + String.fromCharCode(byte);
+    }, "");
   },
   fromObject: async (data: string) => {
     const buf = new ArrayBuffer(data.length);
@@ -42,25 +48,39 @@ const ArrayBufferSerializer: Serializer<ArrayBuffer, string> = {
       bufView[i] = data.charCodeAt(i);
     }
     return buf;
-  }
+  },
 };
 
 interface ArrayBufferViewSerialized {
-  name: 'Int8Array' | 'Uint8Array' | 'Uint8ClampedArray' | 'Int16Array' | 'Uint16Array' | 'Int32Array' | 'Uint32Array' | 'Float32Array' | 'Float64Array' | 'DataView';
+  name:
+    | "Int8Array"
+    | "Uint8Array"
+    | "Uint8ClampedArray"
+    | "Int16Array"
+    | "Uint16Array"
+    | "Int32Array"
+    | "Uint32Array"
+    | "Float32Array"
+    | "Float64Array"
+    | "DataView";
   buffer: ArrayBuffer;
 }
 
 export interface ArrayBufferViewWithPromise extends ArrayBufferView {
   _promise?: Promise<ArrayBufferView>;
 }
-function isArrayBufferViewWithPromise(obj: any): obj is ArrayBufferViewWithPromise {
-    return obj.hasOwnProperty("_promise");
+function isArrayBufferViewWithPromise(
+  obj: any
+): obj is ArrayBufferViewWithPromise {
+  return obj.hasOwnProperty("_promise");
 }
 
 // Normally we could just do `abv.constructor.name`, but in
 // JavaScriptCore, this wont work for some weird reason.
 // list from https://developer.mozilla.org/en-US/docs/Web/API/ArrayBufferView
-function arrayBufferViewName(abv: ArrayBufferView): ArrayBufferViewSerialized['name'] {
+function arrayBufferViewName(
+  abv: ArrayBufferView
+): ArrayBufferViewSerialized["name"] {
   if (abv instanceof Int8Array) {
     return "Int8Array";
   }
@@ -93,7 +113,9 @@ function arrayBufferViewName(abv: ArrayBufferView): ArrayBufferViewSerialized['n
   }
 }
 
-function ArrayBufferViewSerializer(waitForPromise: boolean): Serializer<ArrayBufferView, ArrayBufferViewSerialized> {
+function ArrayBufferViewSerializer(
+  waitForPromise: boolean
+): Serializer<ArrayBufferView, ArrayBufferViewSerialized> {
   return {
     id: "ArrayBufferView",
     isType: ArrayBuffer.isView,
@@ -106,7 +128,7 @@ function ArrayBufferViewSerializer(waitForPromise: boolean): Serializer<ArrayBuf
       }
       return {
         name: arrayBufferViewName(abv),
-        buffer: abv.buffer
+        buffer: abv.buffer,
       };
     },
     fromObject: async (abvs: ArrayBufferViewSerialized) => {
@@ -132,18 +154,20 @@ function ArrayBufferViewSerializer(waitForPromise: boolean): Serializer<ArrayBuf
         case "DataView":
           return new DataView(abvs.buffer);
       }
-    }
+    },
   };
 }
 
 interface CryptoKeyWithData extends CryptoKey {
-  _import: {
-    format: 'jwk'
-    keyData: JsonWebKey
-  } | {
-    format: Exclude<KeyFormat, "jwk">,
-    keyData: BufferSource,
-  };
+  _import:
+    | {
+        format: "jwk";
+        keyData: JsonWebKey;
+      }
+    | {
+        format: Exclude<KeyFormat, "jwk">;
+        keyData: BufferSource;
+      };
 }
 
 function hasData(ck: CryptoKeyWithData | CryptoKey): ck is CryptoKeyWithData {
@@ -154,12 +178,16 @@ interface CryptoKeySerialized extends CryptoKeyWithData {
   serialized: boolean;
 }
 
-const CryptoKeySerializer: Serializer<CryptoKeyWithData | CryptoKey, CryptoKeySerialized> = {
+const CryptoKeySerializer: Serializer<
+  CryptoKeyWithData | CryptoKey,
+  CryptoKeySerialized
+> = {
   id: "CryptoKey",
   isType: (o: any) => {
     const localStr = o.toLocaleString();
     // can't use CryptoKey or constructor on WebView iOS
-    const isCryptoKey = localStr === "[object CryptoKey]" || localStr === "[object Key]";
+    const isCryptoKey =
+      localStr === "[object CryptoKey]" || localStr === "[object Key]";
     const isCryptoKeyWithData = o._import && !o.serialized;
     return isCryptoKey || isCryptoKeyWithData;
   },
@@ -172,34 +200,46 @@ const CryptoKeySerializer: Serializer<CryptoKeyWithData | CryptoKey, CryptoKeySe
         type: ck.type,
         extractable: ck.extractable,
         algorithm: ck.algorithm,
-        usages: ck.usages
+        usages: ck.usages,
       };
     }
     const jwk = await subtle().exportKey("jwk", ck);
     return {
       _import: {
         format: "jwk",
-        keyData: jwk
+        keyData: jwk,
       },
       serialized: true,
       algorithm: ck.algorithm,
       extractable: ck.extractable,
       usages: ck.usages,
-      type: ck.type
+      type: ck.type,
     };
   },
   fromObject: async (cks: CryptoKeySerialized) => {
     // if we don't have access to to a real crypto implementation, just return
     // the serialized crypto key
     if ((crypto as any).fake) {
-      const newCks = {...cks} as CryptoKeySerialized;
+      const newCks = { ...cks } as CryptoKeySerialized;
       delete newCks.serialized;
       return newCks;
     }
     if (cks._import.format === "jwk") {
-      return await subtle().importKey(cks._import.format, cks._import.keyData, cks.algorithm, cks.extractable, cks.usages);
+      return await subtle().importKey(
+        cks._import.format,
+        cks._import.keyData,
+        cks.algorithm,
+        cks.extractable,
+        cks.usages
+      );
     } else {
-      return await subtle().importKey(cks._import.format, cks._import.keyData, cks.algorithm, cks.extractable, cks.usages);
+      return await subtle().importKey(
+        cks._import.format,
+        cks._import.keyData,
+        cks.algorithm,
+        cks.extractable,
+        cks.usages
+      );
     }
-  }
+  },
 };

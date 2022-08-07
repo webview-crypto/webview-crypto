@@ -38,7 +38,7 @@ const ArrayBufferSerializer: Serializer<ArrayBuffer, string> = {
   // modified to use Int8Array so that we can hold odd number of bytes
   toObject: async (ab: ArrayBuffer) => {
     const bytes = new Int8Array(ab);
-    const MAX_BUFFER_LENGTH = 8 * 1024;
+    const MAX_BUFFER_LENGTH = 64 * 1024;
     if (bytes.length <= MAX_BUFFER_LENGTH)
       return String.fromCharCode.apply(null, bytes);
     let str = "";

@@ -42,6 +42,7 @@ const ArrayBufferSerializer: Serializer<ArrayBuffer, string> = {
     if (bytes.length <= MAX_BUFFER_LENGTH)
       return String.fromCharCode.apply(null, bytes);
     let str = "";
+    // Fixes Maximum call stack size exceeded error which triggers when passing large buffers.
     for (let i = 0; i < bytes.length; i += MAX_BUFFER_LENGTH)
       str += String.fromCharCode.apply(
         null,

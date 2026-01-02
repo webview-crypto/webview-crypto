@@ -7,7 +7,7 @@ class WebViewWorker {
     sendToMain("We are ready!");
   }
 
-  async onMainMessage (message) {
+  async onMainMessage(message: string) {
     let id, method, args;
     try {
       ({id, method, args} = await parse(message));

@@ -47,15 +47,15 @@ And when it fails:
 export default class MainWorker {
   // hold a queue of messages to send, in case someone calls crypto
   // before the webview is initialized
-  private toSend: string[] = [];
+  private readonly toSend: string[] = [];
   private readyToSend = false;
 
   // Holds the `resolve` and `reject` function for all the promises
   // we are working on
   private messages: {
     [id: string]: {
-      resolve: (value: any ) => void
-      reject: (reason: any) => void
+      resolve: (value: any) => void;
+      reject: (reason: any) => void;
     }
   } = {};
 
@@ -63,7 +63,6 @@ export default class MainWorker {
   constructor(private sendToWebView: (message: string) => void, private debug = false) {}
 
   get crypto(): Crypto {
-    const callMethod = this.callMethod;
     return ({
       subtle: this.subtle,
       getRandomValues: this.getRandomValues.bind(this),
@@ -72,7 +71,7 @@ export default class MainWorker {
   }
 
   private get subtle(): SubtleCrypto {
-    const s = {};
+    const s: Record<string, any> = {};
     for (let m of SUBTLE_METHODS) {
       s[m] = (...args) => {
         return this.callMethod(`subtle.${m}`, args, true);
@@ -99,7 +98,7 @@ export default class MainWorker {
     return array;
   }
 
-  onWebViewMessage (message): void {
+  onWebViewMessage(message: string): void {
     // first message just tells us the webview is ready
     if (!this.readyToSend) {
       if (this.debug) {

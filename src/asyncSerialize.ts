@@ -1,8 +1,6 @@
-import { find } from "lodash";
-
 export interface Serializer<T, S> {
   id: string;
-  isType: (o: any) => boolean;
+  isType: (o: unknown) => o is T;
   toObject?: (t: T) => Promise<S>;
   fromObject?: (o: S) => Promise<T>;
 }
@@ -12,16 +10,37 @@ interface Serialized {
   value: any;
 }
 
-function isSerialized(object: any): object is Serialized {
-    return object.hasOwnProperty("__serializer_id");
+function isSerialized(object: unknown): object is Serialized {
+  return (
+    object !== null &&
+    typeof object === "object" &&
+    Object.prototype.hasOwnProperty.call(object, "__serializer_id")
+  );
 }
 
-export async function toObjects(serializers: Serializer<any, any>[], o: any): Promise<any> {
-  if (typeof o !== "object") {
+function findSerializerByType(
+  serializers: ReadonlyArray<Serializer<any, any>>,
+  value: unknown
+): Serializer<any, any> | undefined {
+  return serializers.find((serializer) => serializer.isType(value));
+}
+
+function findSerializerById(
+  serializers: ReadonlyArray<Serializer<any, any>>,
+  id: string
+): Serializer<any, any> | undefined {
+  return serializers.find((serializer) => serializer.id === id);
+}
+
+export async function toObjects(
+  serializers: ReadonlyArray<Serializer<any, any>>,
+  o: any
+): Promise<any> {
+  if (o === null || typeof o !== "object") {
     return o;
   }
 
-  const serializer = find(serializers, s => s.isType(o));
+  const serializer = findSerializerByType(serializers, o);
   if (serializer) {
     const value = serializer.toObject ? await serializer.toObject(o) : o;
     return {
@@ -30,29 +49,32 @@ export async function toObjects(serializers: Serializer<any, any>[], o: any): Pr
     } as Serialized;
   }
 
-  const newO = o instanceof Array ? [] : {};
-  for (let atr in o) {
+  const newO = Array.isArray(o) ? [] : {};
+  for (const atr of Object.keys(o)) {
     newO[atr] = await toObjects(serializers, o[atr]);
   }
   return newO;
 }
 
-export async function fromObjects(serializers: Serializer<any, any>[], o: any): Promise<any> {
-  if (typeof o !== "object") {
+export async function fromObjects(
+  serializers: ReadonlyArray<Serializer<any, any>>,
+  o: any
+): Promise<any> {
+  if (o === null || typeof o !== "object") {
     return o;
   }
 
   if (isSerialized(o)) {
     const value = await fromObjects(serializers, o.value);
-    const serializer = find(serializers, ["id", o.__serializer_id]);
+    const serializer = findSerializerById(serializers, o.__serializer_id);
     if (serializer.fromObject) {
       return serializer.fromObject(value);
     }
     return value;
   }
 
-  const newO = o instanceof Array ? [] : {};
-  for (let atr in o) {
+  const newO = Array.isArray(o) ? [] : {};
+  for (const atr of Object.keys(o)) {
     newO[atr] = await fromObjects(serializers, o[atr]);
   }
   return newO;

@@ -5,8 +5,8 @@ declare const WebViewBridge: any;
 
 export async function parse(text: string): Promise<any> {
   // need decodeURIComponent so binary strings are transfered properly
-  const deocodedText = decodeURIComponent(text);
-  const objects = JSON.parse(deocodedText);
+  const decodedText = decodeURIComponent(text);
+  const objects = JSON.parse(decodedText);
   return await fromObjects(serializers(true), objects);
 }
 export async function stringify(
@@ -30,24 +30,27 @@ function serializers(waitForArrayBufferView: boolean) {
   ];
 }
 
+const MAX_BUFFER_LENGTH = 64 * 1024;
+
 const ArrayBufferSerializer: Serializer<ArrayBuffer, string> = {
   id: "ArrayBuffer",
-  isType: (o: any) => o instanceof ArrayBuffer,
+  isType: (o: unknown): o is ArrayBuffer => o instanceof ArrayBuffer,
 
   // from https://developers.google.com/web/updates/2012/06/How-to-convert-ArrayBuffer-to-and-from-String
   // modified to use Int8Array so that we can hold odd number of bytes
   toObject: async (ab: ArrayBuffer) => {
     const bytes = new Int8Array(ab);
-    const MAX_BUFFER_LENGTH = 64 * 1024;
-    if (bytes.length <= MAX_BUFFER_LENGTH)
+    if (bytes.length <= MAX_BUFFER_LENGTH) {
       return String.fromCharCode.apply(null, bytes);
+    }
     let str = "";
     // Fixes Maximum call stack size exceeded error which triggers when passing large buffers.
-    for (let i = 0; i < bytes.length; i += MAX_BUFFER_LENGTH)
+    for (let i = 0; i < bytes.length; i += MAX_BUFFER_LENGTH) {
       str += String.fromCharCode.apply(
         null,
-        bytes.slice(i, i + MAX_BUFFER_LENGTH)
+        bytes.subarray(i, i + MAX_BUFFER_LENGTH)
       );
+    }
     return str;
   },
   fromObject: async (data: string) => {
@@ -75,13 +78,47 @@ interface ArrayBufferViewSerialized {
   buffer: ArrayBuffer;
 }
 
+const typedArrayEntries: Array<
+  [ArrayBufferViewSerialized["name"], new (buffer: ArrayBuffer) => ArrayBufferView]
+> = [
+  ["Int8Array", Int8Array],
+  ["Uint8Array", Uint8Array],
+  ["Uint8ClampedArray", Uint8ClampedArray],
+  ["Int16Array", Int16Array],
+  ["Uint16Array", Uint16Array],
+  ["Int32Array", Int32Array],
+  ["Uint32Array", Uint32Array],
+  ["Float32Array", Float32Array],
+  ["Float64Array", Float64Array],
+  ["DataView", DataView],
+];
+
+const arrayBufferViewNameMap = new Map<
+  new (buffer: ArrayBuffer) => ArrayBufferView,
+  ArrayBufferViewSerialized["name"]
+>(
+  typedArrayEntries.map(([name, ctor]) => [ctor, name])
+);
+
+const arrayBufferViewConstructors = typedArrayEntries.reduce(
+  (acc, [name, ctor]) => {
+    acc[name] = ctor;
+    return acc;
+  },
+  {} as Record<ArrayBufferViewSerialized["name"], new (buffer: ArrayBuffer) => ArrayBufferView>
+);
+
 export interface ArrayBufferViewWithPromise extends ArrayBufferView {
   _promise?: Promise<ArrayBufferView>;
 }
 function isArrayBufferViewWithPromise(
   obj: any
 ): obj is ArrayBufferViewWithPromise {
-  return obj.hasOwnProperty("_promise");
+  return (
+    typeof obj === "object" &&
+    obj !== null &&
+    Object.prototype.hasOwnProperty.call(obj, "_promise")
+  );
 }
 
 // Normally we could just do `abv.constructor.name`, but in
@@ -90,36 +127,16 @@ function isArrayBufferViewWithPromise(
 function arrayBufferViewName(
   abv: ArrayBufferView
 ): ArrayBufferViewSerialized["name"] {
-  if (abv instanceof Int8Array) {
-    return "Int8Array";
+  interface ArrayBufferViewConstructor {
+    new (buffer: ArrayBuffer, byteOffset?: number, length?: number): ArrayBufferView;
   }
-  if (abv instanceof Uint8Array) {
-    return "Uint8Array";
+
+  const constructor = abv.constructor as ArrayBufferViewConstructor;
+  const name = arrayBufferViewNameMap.get(constructor);
+  if (!name) {
+    throw new Error(`Unknown ArrayBufferView: ${abv.constructor?.name}`);
   }
-  if (abv instanceof Uint8ClampedArray) {
-    return "Uint8ClampedArray";
-  }
-  if (abv instanceof Int16Array) {
-    return "Int16Array";
-  }
-  if (abv instanceof Uint16Array) {
-    return "Uint16Array";
-  }
-  if (abv instanceof Int32Array) {
-    return "Int32Array";
-  }
-  if (abv instanceof Uint32Array) {
-    return "Uint32Array";
-  }
-  if (abv instanceof Float32Array) {
-    return "Float32Array";
-  }
-  if (abv instanceof Float64Array) {
-    return "Float64Array";
-  }
-  if (abv instanceof DataView) {
-    return "DataView";
-  }
+  return name;
 }
 
 function ArrayBufferViewSerializer(
@@ -127,7 +144,7 @@ function ArrayBufferViewSerializer(
 ): Serializer<ArrayBufferView, ArrayBufferViewSerialized> {
   return {
     id: "ArrayBufferView",
-    isType: ArrayBuffer.isView,
+    isType: (o: unknown): o is ArrayBufferView => ArrayBuffer.isView(o as any),
     toObject: async (abv: ArrayBufferView) => {
       if (waitForPromise) {
         // wait for promise to resolve if the abv was returned from getRandomValues
@@ -141,28 +158,11 @@ function ArrayBufferViewSerializer(
       };
     },
     fromObject: async (abvs: ArrayBufferViewSerialized) => {
-      switch (abvs.name) {
-        case "Int8Array":
-          return new Int8Array(abvs.buffer);
-        case "Uint8Array":
-          return new Uint8Array(abvs.buffer);
-        case "Uint8ClampedArray":
-          return new Uint8ClampedArray(abvs.buffer);
-        case "Int16Array":
-          return new Int16Array(abvs.buffer);
-        case "Uint16Array":
-          return new Uint16Array(abvs.buffer);
-        case "Int32Array":
-          return new Int32Array(abvs.buffer);
-        case "Uint32Array":
-          return new Uint32Array(abvs.buffer);
-        case "Float32Array":
-          return new Float32Array(abvs.buffer);
-        case "Float64Array":
-          return new Float64Array(abvs.buffer);
-        case "DataView":
-          return new DataView(abvs.buffer);
+      const Constructor = arrayBufferViewConstructors[abvs.name];
+      if (!Constructor) {
+        throw new Error(`Unsupported ArrayBufferView type: ${abvs.name}`);
       }
+      return new Constructor(abvs.buffer);
     },
   };
 }
@@ -192,12 +192,19 @@ const CryptoKeySerializer: Serializer<
   CryptoKeySerialized
 > = {
   id: "CryptoKey",
-  isType: (o: any) => {
-    const localStr = o.toLocaleString();
+  isType: (o: unknown): o is CryptoKeyWithData | CryptoKey => {
+    if (o === null || typeof o !== "object") {
+      return false;
+    }
+
+    const localStr = (o as any).toLocaleString?.();
+    if (typeof localStr !== "string") {
+      return false;
+    }
     // can't use CryptoKey or constructor on WebView iOS
     const isCryptoKey =
       localStr === "[object CryptoKey]" || localStr === "[object Key]";
-    const isCryptoKeyWithData = o._import && !o.serialized;
+    const isCryptoKeyWithData = (o as any)._import && !(o as any).serialized;
     return isCryptoKey || isCryptoKeyWithData;
   },
   toObject: async (ck) => {

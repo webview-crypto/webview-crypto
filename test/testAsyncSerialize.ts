@@ -14,7 +14,8 @@ interface SerializedThing {
 
 const serializer: Serializer<Thing,  SerializedThing> = {
   id: "Thing",
-  isType: (o: any) => o.id === "thing",
+  isType: (o: unknown): o is Thing =>
+    o !== null && typeof o === "object" && (o as any).id === "thing",
   toObject: async (t: Thing) => {
     return {
       name: t.name.toString(),

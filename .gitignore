@@ -1,7 +1,6 @@
 node_modules
 src/*String.ts
 *.js
-!scripts/buildWebViewWorker.js
 !test/zuul.config.js
 
 *.d.ts

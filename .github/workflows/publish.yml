@@ -16,4 +16,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm publish --provenance --access public
+          cache: 'yarn'
+
+      - run: corepack enable
+      
+      - run: yarn install --immutable
+
+      - run: yarn config set npmRegistryServer https://registry.npmjs.org
+      
+      - run: yarn npm publish --provenance --access public
+        env:
+          YARN_NPM_AUTH_TYPE: oidc

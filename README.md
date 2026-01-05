@@ -1,10 +1,6 @@
 # webview-crypto
 
-[![Build Status](https://travis-ci.org/saulshanabrook/webview-crypto.svg?branch=master)](https://travis-ci.org/saulshanabrook/webview-crypto)
 [![npm](https://img.shields.io/npm/v/webview-crypto.svg?maxAge=2592000?style=flat-square)](https://www.npmjs.com/package/webview-crypto)
-[![Dependency Status](https://dependencyci.com/github/saulshanabrook/webview-crypto/badge)](https://dependencyci.com/github/saulshanabrook/webview-crypto)
-
-![Build Status](https://saucelabs.com/browser-matrix/sshanabrook.svg)
 
 This repo provides some helper tools to run the [Web Cryptography API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API)
 in a WebView.

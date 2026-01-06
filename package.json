@@ -7,7 +7,7 @@
   },
   "description": "Helper code for crypto polyfil in a webview ",
   "scripts": {
-    "prepublish": "git clean -Xf src/ && node scripts/buildWebViewWorker.mjs && tsc",
+    "prepare": "git clean -Xf src/ && node scripts/buildWebViewWorker.mjs && tsc",
     "build:watch": "node scripts/buildWebViewWorker.mjs --watch",
     "test:lint": "tsc && cd test; tsc",
     "test": "cd test; zuul --no-coverage --browser-name ${BROWSER_NAME} --browser-version ${BROWSER_VERSION} -- testAll.js",

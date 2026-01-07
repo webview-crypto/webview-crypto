@@ -17,13 +17,9 @@ jobs:
         with:
           node-version: '22'
           cache: 'yarn'
+          registry-url: 'https://registry.npmjs.org'
 
-      - run: corepack enable
-      - run: corepack prepare yarn@4.12.0 --activate
-      - run: yarn install --immutable
-
-      - run: yarn config set npmRegistryServer https://registry.npmjs.org
+      - run: yarn install
       
-      - run: yarn npm publish --provenance --access public
-        env:
-          YARN_NPM_AUTH_TYPE: oidc
+      - run: npm publish --provenance --access public
+  
